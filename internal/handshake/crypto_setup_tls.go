@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"sync"
 
 	"github.com/bifurcation/mint"
@@ -23,7 +24,10 @@ type cryptoSetupTLS struct {
 	keyDerivation KeyDerivationFunction
 
 	mintConf         *mint.Config
+	remoteAddr       net.Addr
 	extensionHandler mint.AppExtensionHandler
+
+	checkCookieCallback func(net.Addr, *Cookie) bool
 
 	nullAEAD crypto.AEAD
 	aead     crypto.AEAD
@@ -38,12 +42,19 @@ var newMintController = func(conn *mint.Conn) crypto.MintController {
 // NewCryptoSetupTLSServer creates a new TLS CryptoSetup instance for a server
 func NewCryptoSetupTLSServer(
 	tlsConfig *tls.Config,
+	remoteAddr net.Addr,
 	transportParams *TransportParameters,
 	aeadChanged chan<- protocol.EncryptionLevel,
+	checkCookie func(net.Addr, *Cookie) bool,
 	supportedVersions []protocol.VersionNumber,
 	version protocol.VersionNumber,
 ) (CryptoSetup, ParamsNegotiator, error) {
 	mintConf, err := tlsToMintConfig(tlsConfig, protocol.PerspectiveServer)
+	if err != nil {
+		return nil, nil, err
+	}
+	mintConf.RequireCookie = true
+	mintConf.CookieHandler, err = newCookieHandler(checkCookie)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -52,6 +63,7 @@ func NewCryptoSetupTLSServer(
 	return &cryptoSetupTLS{
 		perspective:      protocol.PerspectiveServer,
 		mintConf:         mintConf,
+		remoteAddr:       remoteAddr,
 		nullAEAD:         crypto.NewNullAEAD(protocol.PerspectiveServer, version),
 		keyDerivation:    crypto.DeriveAESKeys,
 		aeadChanged:      aeadChanged,
@@ -88,10 +100,14 @@ func NewCryptoSetupTLSClient(
 
 func (h *cryptoSetupTLS) HandleCryptoStream(cryptoStream io.ReadWriter) error {
 	var conn *mint.Conn
+	fc := &fakeConn{
+		ReadWriter: cryptoStream,
+		remoteAddr: h.remoteAddr,
+	}
 	if h.perspective == protocol.PerspectiveServer {
-		conn = mint.Server(&fakeConn{cryptoStream}, h.mintConf)
+		conn = mint.Server(fc, h.mintConf)
 	} else {
-		conn = mint.Client(&fakeConn{cryptoStream}, h.mintConf)
+		conn = mint.Client(fc, h.mintConf)
 	}
 	utils.Debugf("setting extension handler: %#v\n", h.extensionHandler)
 	if err := conn.SetExtensionHandler(h.extensionHandler); err != nil {

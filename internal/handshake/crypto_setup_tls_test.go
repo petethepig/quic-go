@@ -42,8 +42,10 @@ var _ = Describe("TLS Crypto Setup", func() {
 		aeadChanged = make(chan protocol.EncryptionLevel, 2)
 		csInt, _, err := NewCryptoSetupTLSServer(
 			testdata.GetTLSConfig(),
+			nil,
 			&TransportParameters{},
 			aeadChanged,
+			nil,
 			nil,
 			protocol.VersionTLS,
 		)

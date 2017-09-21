@@ -196,8 +196,10 @@ func (s *session) setup(
 		if s.version.UsesTLS() {
 			s.cryptoSetup, s.connParams, err = handshake.NewCryptoSetupTLSServer(
 				tlsConf,
+				s.conn.RemoteAddr(),
 				transportParams,
 				aeadChanged,
+				verifySourceAddr,
 				s.config.Versions,
 				s.version,
 			)
