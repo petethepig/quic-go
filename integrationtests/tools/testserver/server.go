@@ -11,6 +11,7 @@ import (
 	"github.com/lucas-clemente/quic-go/h2quic"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
 	"github.com/lucas-clemente/quic-go/internal/testdata"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -94,6 +95,7 @@ func StartQuicServer(versions []protocol.VersionNumber) {
 	conn, err := net.ListenUDP("udp", addr)
 	Expect(err).NotTo(HaveOccurred())
 	port = strconv.Itoa(conn.LocalAddr().(*net.UDPAddr).Port)
+	utils.Debugf("Port: %s", port)
 
 	go func() {
 		defer GinkgoRecover()

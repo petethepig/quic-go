@@ -25,6 +25,7 @@ var _ = Describe("Client tests", func() {
 	versions := append(protocol.SupportedVersions, protocol.VersionTLS)
 
 	BeforeEach(func() {
+		fmt.Println("BeforeEach")
 		err := os.Setenv("HOSTALIASES", "quic.clemente.io 127.0.0.1")
 		Expect(err).ToNot(HaveOccurred())
 		addr, err := net.ResolveUDPAddr("udp4", "quic.clemente.io:0")
@@ -33,14 +34,20 @@ var _ = Describe("Client tests", func() {
 			Fail("quic.clemente.io does not resolve to 127.0.0.1. Consider adding it to /etc/hosts.")
 		}
 		testserver.StartQuicServer(versions)
+		fmt.Println("End Beforeeach. Port: ", testserver.Port())
 	})
 
 	AfterEach(func() {
+		fmt.Println("AfterEach: Stopping server on port ", testserver.Port())
 		testserver.StopQuicServer()
 	})
 
 	for _, v := range versions {
 		version := v
+
+		if v != protocol.Version39 {
+			continue
+		}
 
 		Context(fmt.Sprintf("with QUIC version %s", version), func() {
 			BeforeEach(func() {

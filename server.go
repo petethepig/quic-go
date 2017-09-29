@@ -67,6 +67,7 @@ func ListenAddr(addr string, tlsConf *tls.Config, config *Config) (Listener, err
 // The listener is not active until Serve() is called.
 // The tls.Config must not be nil, the quic.Config may be nil.
 func Listen(conn net.PacketConn, tlsConf *tls.Config, config *Config) (Listener, error) {
+	utils.Debugf("Listening on %#v", conn.LocalAddr())
 	certChain := crypto.NewCertChain(tlsConf)
 	kex, err := crypto.NewCurve25519KEX()
 	if err != nil {
