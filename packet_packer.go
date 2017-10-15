@@ -8,6 +8,7 @@ import (
 	"github.com/lucas-clemente/quic-go/ackhandler"
 	"github.com/lucas-clemente/quic-go/internal/handshake"
 	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 )
 
@@ -290,7 +291,7 @@ func (p *packetPacker) writeAndSealPacket(
 	payloadFrames []wire.Frame,
 	sealer handshake.Sealer,
 ) ([]byte, error) {
-	raw := getPacketBuffer()
+	raw := utils.GetPacketBuffer()
 	buffer := bytes.NewBuffer(raw)
 
 	if err := publicHeader.Write(buffer, p.version, p.perspective); err != nil {

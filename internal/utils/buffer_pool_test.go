@@ -1,4 +1,4 @@
-package quic
+package utils
 
 import (
 	"github.com/lucas-clemente/quic-go/internal/protocol"
@@ -9,16 +9,16 @@ import (
 
 var _ = Describe("Buffer Pool", func() {
 	It("returns buffers of correct len and cap", func() {
-		buf := getPacketBuffer()
+		buf := GetPacketBuffer()
 		Expect(buf).To(HaveLen(0))
 		Expect(buf).To(HaveCap(int(protocol.MaxReceivePacketSize)))
 	})
 
 	It("zeroes put buffers' length", func() {
 		for i := 0; i < 1000; i++ {
-			buf := getPacketBuffer()
-			putPacketBuffer(buf[0:10])
-			buf = getPacketBuffer()
+			buf := GetPacketBuffer()
+			PutPacketBuffer(buf[0:10])
+			buf = GetPacketBuffer()
 			Expect(buf).To(HaveLen(0))
 			Expect(buf).To(HaveCap(int(protocol.MaxReceivePacketSize)))
 		}
@@ -26,7 +26,7 @@ var _ = Describe("Buffer Pool", func() {
 
 	It("panics if wrong-sized buffers are passed", func() {
 		Expect(func() {
-			putPacketBuffer([]byte{0})
+			PutPacketBuffer([]byte{0})
 		}).To(Panic())
 	})
 })

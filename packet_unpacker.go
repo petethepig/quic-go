@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 	"github.com/lucas-clemente/quic-go/qerr"
 )
@@ -25,8 +26,8 @@ type packetUnpacker struct {
 }
 
 func (u *packetUnpacker) Unpack(publicHeaderBinary []byte, hdr *wire.PublicHeader, data []byte) (*unpackedPacket, error) {
-	buf := getPacketBuffer()
-	defer putPacketBuffer(buf)
+	buf := utils.GetPacketBuffer()
+	defer utils.PutPacketBuffer(buf)
 	decrypted, encryptionLevel, err := u.aead.Open(buf, data, hdr.PacketNumber, publicHeaderBinary)
 	if err != nil {
 		// Wrap err in quicError so that public reset is sent by session

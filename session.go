@@ -314,7 +314,7 @@ runLoop:
 			}
 			// This is a bit unclean, but works properly, since the packet always
 			// begins with the public header and we never copy it.
-			putPacketBuffer(p.publicHeader.Raw)
+			utils.PutPacketBuffer(p.publicHeader.Raw)
 		case l, ok := <-aeadChanged:
 			if !ok { // the aeadChanged chan was closed. This means that the handshake is completed.
 				s.handshakeComplete = true
@@ -714,7 +714,7 @@ func (s *session) sendPacket() error {
 }
 
 func (s *session) sendPackedPacket(packet *packedPacket) error {
-	defer putPacketBuffer(packet.raw)
+	defer utils.PutPacketBuffer(packet.raw)
 	err := s.sentPacketHandler.SentPacket(&ackhandler.Packet{
 		PacketNumber:    packet.number,
 		Frames:          packet.frames,

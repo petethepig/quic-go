@@ -1,4 +1,4 @@
-package quic
+package utils
 
 import (
 	"sync"
@@ -8,13 +8,13 @@ import (
 
 var bufferPool sync.Pool
 
-func getPacketBuffer() []byte {
+func GetPacketBuffer() []byte {
 	return bufferPool.Get().([]byte)
 }
 
-func putPacketBuffer(buf []byte) {
+func PutPacketBuffer(buf []byte) {
 	if cap(buf) != int(protocol.MaxReceivePacketSize) {
-		panic("putPacketBuffer called with packet of wrong size!")
+		panic("PutPacketBuffer called with packet of wrong size!")
 	}
 	bufferPool.Put(buf[:0])
 }

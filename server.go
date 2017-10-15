@@ -158,7 +158,7 @@ func populateServerConfig(config *Config) *Config {
 // serve listens on an existing PacketConn
 func (s *server) serve() {
 	for {
-		data := getPacketBuffer()
+		data := utils.GetPacketBuffer()
 		data = data[:protocol.MaxReceivePacketSize]
 		// The packet size should not exceed protocol.MaxReceivePacketSize bytes
 		// If it does, we only read a truncated packet, which will then end up undecryptable
