@@ -70,7 +70,8 @@ func ParseStreamFrame(r *bytes.Reader, version protocol.VersionNumber) (*StreamF
 		dataLen = uint16(r.Len())
 	}
 	if dataLen != 0 {
-		frame.Data = make([]byte, dataLen)
+		data := utils.GetPacketBuffer()
+		frame.Data = data[:dataLen]
 		if _, err := io.ReadFull(r, frame.Data); err != nil {
 			return nil, err
 		}

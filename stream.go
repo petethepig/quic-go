@@ -170,6 +170,9 @@ func (s *stream) Read(p []byte) (int, error) {
 			fin := frame.FinBit
 			s.mutex.Lock()
 			s.frameQueue.Pop()
+			if cap(frame.Data) == int(protocol.MaxReceivePacketSize) {
+				utils.PutPacketBuffer(frame.Data)
+			}
 			s.mutex.Unlock()
 			if fin {
 				s.finishedReading.Set(true)
